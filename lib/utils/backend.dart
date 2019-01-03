@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:test2/modals/user.model.dart';
 
 abstract class Backend {
   Future<dynamic> addTrasaction() {}
@@ -7,6 +8,7 @@ abstract class Backend {
   // for the user bio update.
   Future<dynamic> addQrCode(String userId, String qrCode) {}
   Future<void> deleteQrCode(String userId, String qrCode) {}
+  Future<QuerySnapshot> getUser(String barcodeId) {}
 }
 
 class FirestoreBackend implements Backend {
@@ -48,6 +50,14 @@ class FirestoreBackend implements Backend {
     //     .collection('barcodes')
     //     .document(barcodeDocId)
     //     .delete();
+  }
+
+  @override
+  Future<QuerySnapshot> getUser(String barcodeId) {
+    return Firestore.instance
+        .collection('users')
+        .where('qrCodes', arrayContains: barcodeId)
+        .getDocuments();
   }
 }
 

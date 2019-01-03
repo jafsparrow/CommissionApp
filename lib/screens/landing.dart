@@ -5,8 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test2/screens/usertransaction.dart';
 
 class Landing extends StatefulWidget {
-  final String result;
-  Landing(this.result);
+  final String userId;
+  Landing(this.userId);
 
   _LandingState createState() => _LandingState();
 }
@@ -16,8 +16,6 @@ class _LandingState extends State<Landing> {
   UserTransaction _transaction;
   UserBio _userBio;
   List<Widget> landingWidgets = [];
-  static String test = 'hello';
-  String uid = 'FaHhoywbTmTLA3sG2rni';
   User _user;
   bool _isLoading = true;
   @override
@@ -26,7 +24,11 @@ class _LandingState extends State<Landing> {
     _user = null;
     // widget gets the user ID from the barcode scan.
     // from this init state get the user data from firestore and cache it here and pass it to usr bio.
-    Firestore.instance.collection('users').document(uid).get().then((user) {
+    Firestore.instance
+        .collection('users')
+        .document(widget.userId)
+        .get()
+        .then((user) {
       _user = User.fromMap(user.data);
       _transaction = new UserTransaction(user);
       _userBio = new UserBio(user);
