@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:test2/modals/user.model.dart';
 import 'package:test2/utils/backend.dart';
+import 'package:test2/utils/barcode.dart';
 
 class UserBio extends StatefulWidget {
   _UserBioState createState() => _UserBioState();
@@ -15,6 +16,7 @@ class _UserBioState extends State<UserBio> {
   User _userData;
   String firestoreUserId;
   FirestoreBackend _backend = new FirestoreBackend();
+  BarcodeScanUtility scanner = new BarcodeScanUtility();
   int _count = 0;
   @override
   void initState() {
@@ -38,11 +40,11 @@ class _UserBioState extends State<UserBio> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
-          _backend
-              .addQrCode(firestoreUserId, _count.toString())
-              .then((onValue) {
-            _count++;
-            setState(() {});
+          scanner.scanQrCode().then((barcode) {
+            _backend.addQrCode(firestoreUserId, barcode).then((onValue) {
+              _count++;
+              setState(() {});
+            });
           });
         },
       ),
@@ -119,12 +121,12 @@ class _UserBioState extends State<UserBio> {
     return FutureBuilder(
       future: getBarcode(),
       builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Center(child: Text('Loading..!'));
+        }
         return ListView.builder(
           itemCount: snapshot.data['qrCodes'].length,
           itemBuilder: (context, index) {
-            if (!snapshot.hasData) {
-              return Center(child: Text('Loading..!'));
-            }
             // return Text('hello world');
             return ListTile(
               trailing: IconButton(

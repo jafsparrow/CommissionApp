@@ -53,7 +53,6 @@ class _LandingState extends State<Landing> {
       body: Container(
         height: double.infinity,
         width: double.infinity,
-        color: Colors.green,
         child: _isLoading ? Text('loading') : landingWidgets[_currentIndex],
       ),
       bottomNavigationBar: BottomNavigationBar(
