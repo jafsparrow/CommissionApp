@@ -4,6 +4,10 @@ abstract class Backend {
   Future<dynamic> addTrasaction() {}
   Future<dynamic> updateTransaction() {}
   Future<dynamic> deleteTransaction() {}
+  // for the user bio update.
+  Future<dynamic> addQrCode(String userId, String qrCode) {}
+  Future<void> deleteQrCode(
+      String userId, String barcodeDocId, String qrCode) {}
 }
 
 class FirestoreBackend implements Backend {
@@ -24,4 +28,29 @@ class FirestoreBackend implements Backend {
     // TODO: implement updateTransaction
     return null;
   }
+
+  @override
+  Future addQrCode(String userId, String qrCode) {
+    Map<String, String> data = {"code": qrCode};
+    return userDBCollection.document(userId).collection('barcodes').add(data);
+  }
+
+  @override
+  Future<void> deleteQrCode(String userId, String barcodeDocId, String qrCode) {
+    return userDBCollection
+        .document(userId)
+        .collection('barcodes')
+        .document(barcodeDocId)
+        .delete();
+  }
 }
+
+// the array uinion did not add duplicate strings to the array in firestore.don't know why .. need a tutorial on this. firstore letting me
+// to have duplicates
+// @override
+// Future addQrCode(String userId, String qrCode) {
+//   Map<String, String> data = {"qrCodes": qrCode};
+//   return userDBCollection.document(userId).updateData({
+//     'qrCodes': FieldValue.arrayUnion([data['qrCodes']])
+//   });
+// }

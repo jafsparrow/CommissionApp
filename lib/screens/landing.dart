@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:test2/modals/user.model.dart';
 import 'package:test2/screens/userbio.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test2/screens/usertransaction.dart';
@@ -17,14 +18,16 @@ class _LandingState extends State<Landing> {
   List<Widget> landingWidgets = [];
   static String test = 'hello';
   String uid = 'FaHhoywbTmTLA3sG2rni';
-  dynamic _user = {};
+  User _user;
   bool _isLoading = true;
   @override
   initState() {
     super.initState();
+    _user = null;
     // widget gets the user ID from the barcode scan.
     // from this init state get the user data from firestore and cache it here and pass it to usr bio.
     Firestore.instance.collection('users').document(uid).get().then((user) {
+      _user = User.fromMap(user.data);
       _transaction = new UserTransaction(user);
       _userBio = new UserBio(user);
       landingWidgets = [_transaction, _userBio];
@@ -43,7 +46,7 @@ class _LandingState extends State<Landing> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('User Name'),
+        title: _isLoading ? Text('Loading..!') : Text(_user.userName),
       ),
       body: Container(
         height: double.infinity,
