@@ -69,8 +69,9 @@ class FirestoreBackend implements Backend {
     DateTime _today = DateTime.now();
     Map<String, dynamic> newUser = {
       "name": username,
-      "mobile": mobile,
-      "addedDate": _today
+      "phone": mobile,
+      "addedDate": _today,
+      "qrCodes": []
     };
     return userDBCollection.add(newUser);
   }

@@ -24,6 +24,7 @@ class _LandingState extends State<Landing> {
     _user = null;
     // widget gets the user ID from the barcode scan.
     // from this init state get the user data from firestore and cache it here and pass it to usr bio.
+    print(widget.userId);
     Firestore.instance
         .collection('users')
         .document(widget.userId)

@@ -118,11 +118,15 @@ class _UserBioState extends State<UserBio> {
   }
 
   _buildBarCodeList() {
+    return Text('hello worl');
     return FutureBuilder(
       future: getBarcode(),
       builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: Text('Loading..!'));
+        }
+        if (snapshot == null) {
+          return Center(child: Text('No item to load..!'));
         }
         return ListView.builder(
           itemCount: snapshot.data['qrCodes'].length,
