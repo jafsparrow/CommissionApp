@@ -34,17 +34,20 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String qrCode = '';
   DocumentSnapshot _userDocSnapshot = null;
+  bool _searching = false;
 
   void readQr() async {}
   FirestoreBackend _backend = new FirestoreBackend();
   BarcodeScanUtility scanner = new BarcodeScanUtility();
   _findUserFromBarcode() async {
     try {
+      _searching = true;
       String qrCode = await scanner.scanQrCode();
       if (qrCode.length > 0) {
         print(qrCode);
         _backend.getUser(qrCode).then((docs) {
           setState(() {
+            _searching = false;
             _userDocSnapshot = docs.documents[0];
           });
         });
@@ -73,19 +76,22 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Text('$qrCode'),
-            _userList(),
-          ],
-        ),
+        child: _searching
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: <Widget>[
+                  _userList(),
+                ],
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _findUserFromBarcode();
         },
-        tooltip: 'Increment',
+        tooltip: 'scan',
         child: Icon(Icons.search),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
@@ -95,6 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return _userDocSnapshot != null
         ? ListTile(
             title: Text(_userDocSnapshot.data['name']),
+            leading: Icon(Icons.account_circle),
             onTap: () {
               Navigator.push(
                   context,

@@ -17,6 +17,8 @@ class _UserTransactionState extends State<UserTransaction> {
   String _totalBill;
   String _paintBill;
   String _formHint = '';
+  double _paitFraction = 0.1;
+  double _mainFactor = 0.25;
 
   bool validateAndSave() {
     final form = formKey.currentState;
@@ -30,19 +32,30 @@ class _UserTransactionState extends State<UserTransaction> {
   void validateAndSubmit() async {
     if (validateAndSave()) {
       try {
-        // TransactionModal _trasaction = new TransactionModal(
-        //     double.parse(_totalBill), double.parse(_paintBill));
-        // print(_trasaction);
+        if (_paintBill.length == 0) {
+          _paintBill = '0';
+        }
+        double totalBill = double.parse(_totalBill);
+        double paintBill = double.parse(_paintBill);
+        if (totalBill < paintBill) {
+          return;
+        }
+        formKey.currentState.reset();
 
-        DateTime dates = new DateTime.now();
-        var datas = {
+        DateTime date = new DateTime.now();
+        double points = totalBill * _mainFactor + paintBill * _paitFraction;
+        var data = {
           'note': 'some note if there is any',
-          'billAmount': _totalBill,
-          'date': dates
+          'totalBill': _totalBill,
+          'paintBill': _paintBill,
+          'date': date,
+          'points': points
         };
         Firestore.instance
+            .collection('users')
+            .document(widget._user.documentID)
             .collection('transaction')
-            .add(datas)
+            .add(data)
             .then((item) => print('result'));
       } catch (e) {
         print(e);
@@ -86,7 +99,7 @@ class _UserTransactionState extends State<UserTransaction> {
                 key: Key('paint'),
                 decoration: InputDecoration(labelText: 'Paint bill amount'),
                 // validator: (val) =>
-                //     val.isEmpty ? 'paint amount can\'t be empty.' : null,
+                //     _totalBill.isEmpty ? 'total amount can\'t be empty.' : null,
                 onSaved: (val) => _paintBill = val,
                 keyboardType: TextInputType.number,
               ),
@@ -112,7 +125,11 @@ class _UserTransactionState extends State<UserTransaction> {
         ),
         Expanded(
           child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance.collection('transaction').snapshots(),
+            stream: Firestore.instance
+                .collection('users')
+                .document(widget._user.documentID)
+                .collection('transaction')
+                .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
               if (snapshot.hasError)
@@ -125,8 +142,15 @@ class _UserTransactionState extends State<UserTransaction> {
                     children: snapshot.data.documents
                         .map((DocumentSnapshot document) {
                       return new ListTile(
-                        title: Text('hellow world'),
-                      );
+                          title: Text('Bill Amount : ' +
+                              document.data['totalBill'].toString()),
+                          subtitle: Text(
+                              DateTime.parse(document.data['date'].toString())
+                                  .toString()),
+                          trailing: Container(
+                              child: document.data['points'] != null
+                                  ? Text(document.data['points'].toString())
+                                  : Text('not updated')));
                     }).toList(),
                   );
               }
