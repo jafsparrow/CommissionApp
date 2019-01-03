@@ -1,0 +1,73 @@
+{
+  "project_info": {
+    "project_number": "902350923749",
+    "firebase_url": "https://bakker-shop.firebaseio.com",
+    "project_id": "bakker-shop",
+    "storage_bucket": "bakker-shop.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902350923749:android:dd94a1852fdf734f",
+        "android_client_info": {
+          "package_name": "com.example.bakkershop"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902350923749-tdn15nob0lc3gi8lgh4rvdfb0d3th1eu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCktxj5hVIvJzSWvH6HpaosPjunaGACp5A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:902350923749:android:3f428a0fce98a4be",
+        "android_client_info": {
+          "package_name": "com.example.test2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "902350923749-tdn15nob0lc3gi8lgh4rvdfb0d3th1eu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCktxj5hVIvJzSWvH6HpaosPjunaGACp5A"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
