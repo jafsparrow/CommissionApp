@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:test2/modals/user.model.dart';
@@ -13,7 +15,7 @@ class _UserBioState extends State<UserBio> {
   User _userData;
   String firestoreUserId;
   FirestoreBackend _backend = new FirestoreBackend();
-
+  int _count = 0;
   @override
   void initState() {
     super.initState();
@@ -21,14 +23,12 @@ class _UserBioState extends State<UserBio> {
     _userData = User.fromMap(widget._user.data);
   }
 
-  Future<List<DocumentSnapshot>> getBarcode() async {
-    QuerySnapshot qn = await Firestore.instance
+  Future<DocumentSnapshot> getBarcode() async {
+    DocumentSnapshot qn = await Firestore.instance
         .collection('users')
         .document(firestoreUserId)
-        .collection('barcodes')
-        .getDocuments();
-    print(qn.documents);
-    return qn.documents;
+        .get();
+    return qn;
   }
 
   @override
@@ -38,10 +38,11 @@ class _UserBioState extends State<UserBio> {
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: () {
-          _backend.addQrCode(firestoreUserId, 'qrcodeSample').then((value) {
-            setState(() {
-              print('something has to happen');
-            });
+          _backend
+              .addQrCode(firestoreUserId, _count.toString())
+              .then((onValue) {
+            _count++;
+            setState(() {});
           });
         },
       ),
@@ -54,47 +55,29 @@ class _UserBioState extends State<UserBio> {
             child: userBio(),
           ),
           Expanded(
-              child: FutureBuilder(
-            future: getBarcode(),
-            builder: (BuildContext context,
-                AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: Text('Loading..!'));
-              }
-              return ListView.builder(
-                itemCount: snapshot.data.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ListTile(
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _backend
-                            .deleteQrCode(firestoreUserId,
-                                snapshot.data[index].documentID, "sampleCode")
-                            .then((onValue) {
-                          setState(() {});
-                        });
-                      },
-                    ),
-                    title: Text(snapshot.data[index].data['code']),
-                  );
-                },
-              );
-            },
+            child: _buildBarCodeList(),
           )
-              // ListView.builder(
-              //   itemCount: _userData.qrCodes.length,
-              //   itemBuilder: (BuildContext context, int index) {
-              //     return ListTile(
-              //       trailing: IconButton(
-              //         icon: Icon(Icons.delete),
-              //         onPressed: () {},
-              //       ),
-              //       title: Text(_userData.qrCodes[index]),
-              //     );
-              //   },
-              // ),
-              )
+
+          // child: ListView.builder(
+          //   itemCount: _userData.qrCodes.length,
+          //   itemBuilder: (BuildContext context, int index) {
+          //     return ListTile(
+          //       trailing: IconButton(
+          //         icon: Icon(Icons.delete),
+          //         onPressed: () {
+          //           _backend
+          //               .deleteQrCode(
+          //                   firestoreUserId, _userData.qrCodes[index])
+          //               .then((value) {
+          //             setState(() {});
+          //           });
+          //         },
+          //       ),
+          //       title: Text(_userData.qrCodes[index]),
+          //     );
+          //   },
+          // ),
+          // ),
         ],
       ),
     );
@@ -129,6 +112,37 @@ class _UserBioState extends State<UserBio> {
           ],
         )
       ],
+    );
+  }
+
+  _buildBarCodeList() {
+    return FutureBuilder(
+      future: getBarcode(),
+      builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+        return ListView.builder(
+          itemCount: snapshot.data['qrCodes'].length,
+          itemBuilder: (context, index) {
+            if (!snapshot.hasData) {
+              return Center(child: Text('Loading..!'));
+            }
+            // return Text('hello world');
+            return ListTile(
+              trailing: IconButton(
+                icon: Icon(Icons.delete),
+                onPressed: () {
+                  _backend
+                      .deleteQrCode(
+                          firestoreUserId, snapshot.data['qrCodes'][index])
+                      .then((value) {
+                    setState(() {});
+                  });
+                },
+              ),
+              title: Text(snapshot.data['qrCodes'][index]),
+            );
+          },
+        );
+      },
     );
   }
 }

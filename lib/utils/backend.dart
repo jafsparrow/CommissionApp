@@ -6,8 +6,7 @@ abstract class Backend {
   Future<dynamic> deleteTransaction() {}
   // for the user bio update.
   Future<dynamic> addQrCode(String userId, String qrCode) {}
-  Future<void> deleteQrCode(
-      String userId, String barcodeDocId, String qrCode) {}
+  Future<void> deleteQrCode(String userId, String qrCode) {}
 }
 
 class FirestoreBackend implements Backend {
@@ -32,16 +31,23 @@ class FirestoreBackend implements Backend {
   @override
   Future addQrCode(String userId, String qrCode) {
     Map<String, String> data = {"code": qrCode};
-    return userDBCollection.document(userId).collection('barcodes').add(data);
+    // return userDBCollection.document(userId).collection('barcodes').add(data);
+
+    return userDBCollection.document(userId).updateData({
+      'qrCodes': FieldValue.arrayUnion([qrCode])
+    });
   }
 
   @override
-  Future<void> deleteQrCode(String userId, String barcodeDocId, String qrCode) {
-    return userDBCollection
-        .document(userId)
-        .collection('barcodes')
-        .document(barcodeDocId)
-        .delete();
+  Future<void> deleteQrCode(String userId, String qrCode) {
+    return userDBCollection.document(userId).updateData({
+      'qrCodes': FieldValue.arrayRemove([qrCode])
+    });
+    // return userDBCollection
+    //     .document(userId)
+    //     .collection('barcodes')
+    //     .document(barcodeDocId)
+    //     .delete();
   }
 }
 
