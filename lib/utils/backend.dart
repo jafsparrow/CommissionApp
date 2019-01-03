@@ -9,6 +9,10 @@ abstract class Backend {
   Future<dynamic> addQrCode(String userId, String qrCode) {}
   Future<void> deleteQrCode(String userId, String qrCode) {}
   Future<QuerySnapshot> getUser(String barcodeId) {}
+
+  Future<dynamic> addUser(String username, String mobile) {}
+
+  Future<QuerySnapshot> findUsers() {}
 }
 
 class FirestoreBackend implements Backend {
@@ -58,6 +62,22 @@ class FirestoreBackend implements Backend {
         .collection('users')
         .where('qrCodes', arrayContains: barcodeId)
         .getDocuments();
+  }
+
+  @override
+  Future addUser(String username, String mobile) {
+    DateTime _today = DateTime.now();
+    Map<String, dynamic> newUser = {
+      "name": username,
+      "mobile": mobile,
+      "addedDate": _today
+    };
+    return userDBCollection.add(newUser);
+  }
+
+  @override
+  Future<QuerySnapshot> findUsers() {
+    return userDBCollection.orderBy('addedDate').getDocuments();
   }
 }
 

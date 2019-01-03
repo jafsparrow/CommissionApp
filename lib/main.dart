@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test2/screens/landing.dart';
 import 'package:qrcode_reader/qrcode_reader.dart';
+import 'package:test2/screens/usermanage.dart';
 import 'package:test2/utils/backend.dart';
 import 'package:test2/utils/barcode.dart';
 
@@ -14,7 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Bakker Shop',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.orange,
       ),
       home: MyHomePage(title: 'Bakker Shop'),
     );
@@ -31,14 +32,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
   String qrCode = '';
   DocumentSnapshot _userDocSnapshot = null;
   bool _searching = false;
 
-  void readQr() async {}
   FirestoreBackend _backend = new FirestoreBackend();
   BarcodeScanUtility scanner = new BarcodeScanUtility();
+
   _findUserFromBarcode() async {
     try {
       _searching = true;
@@ -49,6 +49,11 @@ class _MyHomePageState extends State<MyHomePage> {
           setState(() {
             _searching = false;
             _userDocSnapshot = docs.documents[0];
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        Landing(_userDocSnapshot.documentID)));
           });
         });
       } else {
@@ -60,58 +65,105 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  _moveToUserDetailPage(DocumentSnapshot userDoc) {
+    Navigator.push(context,
+        MaterialPageRoute(builder: (context) => Landing(userDoc.documentID)));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
         title: Text(widget.title),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.person_add),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      fullscreenDialog: true,
+                      builder: (context) => UserManagement()));
+            },
           )
         ],
       ),
 
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: _searching
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  _userList(),
-                ],
-              ),
+      body: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Container(
+          height: double.infinity,
+          child: _userList(),
+        ),
       ),
+
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _findUserFromBarcode();
-        },
+        onPressed: _searching
+            ? null
+            : () {
+                _findUserFromBarcode();
+              },
         tooltip: 'scan',
-        child: Icon(Icons.search),
+        child: Container(
+          child: _searching
+              ? CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+              : Icon(
+                  Icons.search,
+                  color: Colors.white,
+                ),
+        ),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 
   _userList() {
-    return _userDocSnapshot != null
-        ? ListTile(
-            title: Text(_userDocSnapshot.data['name']),
-            leading: Icon(Icons.account_circle),
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) =>
-                          Landing(_userDocSnapshot.documentID)));
-            },
-          )
-        : Center(
-            child: Text('Please tap on search button to scan qr code'),
-          );
+    return StreamBuilder(
+      stream: _backend.userDBCollection.snapshots(),
+      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator();
+        }
+
+        return _userListView(snapshot.data.documents);
+      },
+    );
+  }
+
+  _userListView(List<DocumentSnapshot> docs) {
+    return ListView.builder(
+      itemCount: docs.length,
+      itemBuilder: (context, index) {
+        return _userView(docs[index]);
+      },
+    );
+  }
+
+  _userView(DocumentSnapshot userDocumentSnapshot) {
+    return Padding(
+      padding: EdgeInsets.all(5.0),
+      child: Material(
+        borderRadius: BorderRadius.all(Radius.circular(5.0)),
+        elevation: 5.0,
+        child: Container(
+          child: ListTile(
+            title: Text(userDocumentSnapshot.data['name']),
+            leading: CircleAvatar(
+              child: Icon(
+                Icons.account_circle,
+                color: Colors.white,
+              ),
+              backgroundColor: Colors.orange,
+            ),
+            subtitle: Text('Total Points'),
+            onLongPress: () => _moveToUserDetailPage(userDocumentSnapshot),
+          ),
+          width: double.infinity,
+        ),
+      ),
+    );
   }
 }
