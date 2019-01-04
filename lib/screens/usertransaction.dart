@@ -126,7 +126,10 @@ class _UserTransactionState extends State<UserTransaction> {
                 key: Key('Update'),
                 padding: EdgeInsets.all(5.0),
                 child: Text('Update', style: TextStyle(fontSize: 16.0)),
-                onPressed: validateAndSubmit),
+                onPressed: () {
+                  validateAndSubmit();
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                }),
           ),
         ],
       ),
