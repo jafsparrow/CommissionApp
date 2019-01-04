@@ -82,82 +82,76 @@ class _UserTransactionState extends State<UserTransaction> {
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        new Form(
-          key: formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              new TextFormField(
-                key: new Key('bill'),
-                decoration: new InputDecoration(labelText: 'Total Bill amount'),
-                validator: (val) =>
-                    val.isEmpty ? 'Bill amount can\'t be empty.' : null,
-                onSaved: (val) => _totalBill = val,
-                keyboardType: TextInputType.number,
-              ),
-              TextFormField(
-                key: Key('paint'),
-                decoration: InputDecoration(labelText: 'Paint bill amount'),
-                // validator: (val) =>
-                //     _totalBill.isEmpty ? 'total amount can\'t be empty.' : null,
-                onSaved: (val) => _paintBill = val,
-                keyboardType: TextInputType.number,
-              ),
-              RaisedButton(
-                  key: Key('Update'),
-                  padding: EdgeInsets.all(5.0),
-                  child: Text('Update', style: TextStyle(fontSize: 16.0)),
-                  onPressed: validateAndSubmit),
-            ],
-          ),
-        ),
-        Container(
-          padding: EdgeInsets.all(10.0),
-          color: Colors.amber,
-          child: Center(
-            child: Text(
-              'Bills',
-              style: TextStyle(
-                fontSize: 20.0,
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: Firestore.instance
-                .collection('users')
-                .document(widget._user.documentID)
-                .collection('transaction')
-                .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-              if (snapshot.hasError)
-                return new Text('Error: ${snapshot.error}');
-              switch (snapshot.connectionState) {
-                case ConnectionState.waiting:
-                  return new Text('Loading...');
-                default:
-                  return new ListView(
-                    children: snapshot.data.documents
-                        .map((DocumentSnapshot document) {
-                      return new ListTile(
-                          title: Text('Bill Amount : ' +
-                              document.data['totalBill'].toString()),
-                          subtitle: Text(
-                              DateTime.parse(document.data['date'].toString())
-                                  .toString()),
-                          trailing: Container(
-                              child: document.data['points'] != null
-                                  ? Text(document.data['points'].toString())
-                                  : Text('not updated')));
-                    }).toList(),
-                  );
-              }
-            },
-          ),
-        ),
+        _transactionFrom(),
+        Expanded(child: _userTransactions()),
       ],
+    );
+  }
+
+  _transactionFrom() {
+    return Form(
+      key: formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          new TextFormField(
+            key: new Key('bill'),
+            decoration: new InputDecoration(labelText: 'Total Bill amount'),
+            validator: (val) =>
+                val.isEmpty ? 'Bill amount can\'t be empty.' : null,
+            onSaved: (val) => _totalBill = val,
+            keyboardType: TextInputType.number,
+          ),
+          TextFormField(
+            key: Key('paint'),
+            decoration: InputDecoration(labelText: 'Paint bill amount'),
+            // validator: (val) =>
+            //     _totalBill.isEmpty ? 'total amount can\'t be empty.' : null,
+            onSaved: (val) => _paintBill = val,
+            keyboardType: TextInputType.number,
+          ),
+          Center(
+            child: RaisedButton(
+                key: Key('Update'),
+                padding: EdgeInsets.all(5.0),
+                child: Text('Update', style: TextStyle(fontSize: 16.0)),
+                onPressed: validateAndSubmit),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _userTransactions() {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance
+          .collection('users')
+          .document(widget._user.documentID)
+          .collection('transaction')
+          .snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting:
+            return new Text('Loading...');
+          default:
+            return new ListView(
+              children:
+                  snapshot.data.documents.map((DocumentSnapshot document) {
+                return new ListTile(
+                    title: Text('Bill Amount : ' +
+                        document.data['totalBill'].toString()),
+                    subtitle: Text(
+                        DateTime.parse(document.data['date'].toString())
+                            .toString()),
+                    trailing: Container(
+                        child: document.data['points'] != null
+                            ? Text(document.data['points'].toString())
+                            : Text('not updated')));
+              }).toList(),
+            );
+        }
+      },
     );
   }
 }

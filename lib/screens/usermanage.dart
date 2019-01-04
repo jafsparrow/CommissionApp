@@ -10,6 +10,7 @@ class _UserManagementState extends State<UserManagement> {
   FirestoreBackend _backend = new FirestoreBackend();
   String _username;
   String _phone;
+  bool _submitting = false;
   bool validateAndSave() {
     final form = formKey.currentState;
     if (form.validate()) {
@@ -21,8 +22,12 @@ class _UserManagementState extends State<UserManagement> {
 
   _addUser() {
     if (validateAndSave()) {
+      setState(() {
+        _submitting = true;
+      });
       print('form submitted');
       _backend.addUser(_username, _phone).then((user) {
+        _submitting = false;
         Navigator.pop(context);
       });
     }
@@ -77,14 +82,18 @@ class _UserManagementState extends State<UserManagement> {
                   padding: EdgeInsets.all(10.0),
                   child: Padding(
                     padding: EdgeInsets.all(10.0),
-                    child: RaisedButton(
-                      elevation: 6.0,
-                      color: Colors.orange.shade100,
-                      child: Text('Add new user'),
-                      onPressed: () {
-                        _addUser();
-                      },
-                    ),
+                    child: _submitting
+                        ? Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : RaisedButton(
+                            elevation: 6.0,
+                            color: Colors.orange.shade100,
+                            child: Text('Add new user'),
+                            onPressed: () {
+                              _addUser();
+                            },
+                          ),
                   ),
                 )
               ],

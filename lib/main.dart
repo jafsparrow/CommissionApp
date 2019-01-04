@@ -57,10 +57,16 @@ class _MyHomePageState extends State<MyHomePage> {
           });
         });
       } else {
+        setState(() {
+          _searching = false;
+        });
         print('something wrong in getting qr code');
       }
     } catch (e) {
       // print(e);
+      setState(() {
+        _searching = false;
+      });
       print('error happened');
     }
   }
@@ -90,12 +96,9 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
 
-      body: Padding(
-        padding: EdgeInsets.all(10.0),
-        child: Container(
-          height: double.infinity,
-          child: _userList(),
-        ),
+      body: Container(
+        height: double.infinity,
+        child: _userList(),
       ),
 
       floatingActionButton: FloatingActionButton(
@@ -125,7 +128,7 @@ class _MyHomePageState extends State<MyHomePage> {
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
         if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return Center(child: CircularProgressIndicator());
         }
 
         return _userListView(snapshot.data.documents);

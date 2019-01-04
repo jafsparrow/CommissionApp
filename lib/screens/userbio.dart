@@ -86,52 +86,54 @@ class _UserBioState extends State<UserBio> {
   }
 
   Widget userBio() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        Center(
-          child: Text(
-            _userData.phoneNumber,
-            style: TextStyle(
-              fontSize: 20.0,
-              fontWeight: FontWeight.w300,
-            ),
-          ),
-        ),
-        Row(
+    return Padding(
+      padding: const EdgeInsets.all(4.0),
+      child: Material(
+        elevation: 5.0,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: <Widget>[
-            Column(
-              children: <Widget>[Text('Total Points'), Text('100.0')],
+            Center(
+              child: Column(
+                children: <Widget>[
+                  CircleAvatar(
+                    child: Icon(Icons.account_circle),
+                  ),
+                  Text(
+                    _userData.phoneNumber,
+                    style: TextStyle(
+                      fontSize: 25.0,
+                      fontWeight: FontWeight.w200,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            Column(
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Text('Total Cards Assigned'),
-                Text(_userData.qrCodes.length.toString())
+                _scoreDisplay('100.0', 'Points'),
+                _scoreDisplay('12', 'Cards'),
               ],
             )
           ],
-        )
-      ],
+        ),
+      ),
     );
   }
 
   _buildBarCodeList() {
-    return Text('hello worl');
     return FutureBuilder(
       future: getBarcode(),
       builder: (context, AsyncSnapshot<DocumentSnapshot> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: Text('Loading..!'));
         }
-        if (snapshot == null) {
-          return Center(child: Text('No item to load..!'));
-        }
+        if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
         return ListView.builder(
           itemCount: snapshot.data['qrCodes'].length,
           itemBuilder: (context, index) {
-            // return Text('hello world');
             return ListTile(
               trailing: IconButton(
                 icon: Icon(Icons.delete),
@@ -149,6 +151,21 @@ class _UserBioState extends State<UserBio> {
           },
         );
       },
+    );
+  }
+
+  _scoreDisplay(String score, String type) {
+    return Column(
+      children: <Widget>[
+        Text(
+          score,
+          style: TextStyle(fontSize: 20.0),
+        ),
+        Text(
+          type,
+          style: TextStyle(fontWeight: FontWeight.w100),
+        ),
+      ],
     );
   }
 }

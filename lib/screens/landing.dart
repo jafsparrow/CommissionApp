@@ -48,10 +48,12 @@ class _LandingState extends State<Landing> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade200,
       appBar: AppBar(
         title: _isLoading ? Text('Loading..!') : Text(_user.userName),
       ),
       body: Container(
+        padding: EdgeInsets.all(5.0),
         height: double.infinity,
         width: double.infinity,
         child: _isLoading ? Text('loading') : landingWidgets[_currentIndex],
