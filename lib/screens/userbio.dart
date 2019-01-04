@@ -6,6 +6,8 @@ import 'package:test2/modals/user.model.dart';
 import 'package:test2/utils/backend.dart';
 import 'package:test2/utils/barcode.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 class UserBio extends StatefulWidget {
   _UserBioState createState() => _UserBioState();
   DocumentSnapshot _user;
@@ -31,6 +33,15 @@ class _UserBioState extends State<UserBio> {
         .document(firestoreUserId)
         .get();
     return qn;
+  }
+
+  _launchURL(phone) async {
+    String url = 'tel:$phone';
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 
   @override
@@ -100,12 +111,23 @@ class _UserBioState extends State<UserBio> {
                   CircleAvatar(
                     child: Icon(Icons.account_circle),
                   ),
-                  Text(
-                    _userData.phoneNumber,
-                    style: TextStyle(
-                      fontSize: 25.0,
-                      fontWeight: FontWeight.w200,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Text(
+                        _userData.phoneNumber,
+                        style: TextStyle(
+                          fontSize: 25.0,
+                          fontWeight: FontWeight.w200,
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.call),
+                        onPressed: () {
+                          _launchURL(_userData.phoneNumber);
+                        },
+                      )
+                    ],
                   ),
                 ],
               ),
