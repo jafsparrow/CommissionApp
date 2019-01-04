@@ -161,7 +161,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               backgroundColor: Colors.orange,
             ),
-            subtitle: Text('Total Points'),
+            subtitle:
+                Text('Total Points ${userDocumentSnapshot.data['totalPoint']}'),
             onLongPress: () => _moveToUserDetailPage(userDocumentSnapshot),
           ),
           width: double.infinity,

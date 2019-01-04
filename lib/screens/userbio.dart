@@ -24,7 +24,9 @@ class _UserBioState extends State<UserBio> {
   void initState() {
     super.initState();
     firestoreUserId = widget._user.documentID;
+    print(widget._user.data['totalPoint']);
     _userData = User.fromMap(widget._user.data);
+    print(_userData.totalPoint);
   }
 
   Future<DocumentSnapshot> getBarcode() async {
@@ -70,27 +72,6 @@ class _UserBioState extends State<UserBio> {
           Expanded(
             child: _buildBarCodeList(),
           )
-
-          // child: ListView.builder(
-          //   itemCount: _userData.qrCodes.length,
-          //   itemBuilder: (BuildContext context, int index) {
-          //     return ListTile(
-          //       trailing: IconButton(
-          //         icon: Icon(Icons.delete),
-          //         onPressed: () {
-          //           _backend
-          //               .deleteQrCode(
-          //                   firestoreUserId, _userData.qrCodes[index])
-          //               .then((value) {
-          //             setState(() {});
-          //           });
-          //         },
-          //       ),
-          //       title: Text(_userData.qrCodes[index]),
-          //     );
-          //   },
-          // ),
-          // ),
         ],
       ),
     );
@@ -135,8 +116,8 @@ class _UserBioState extends State<UserBio> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                _scoreDisplay('100.0', 'Points'),
-                _scoreDisplay('12', 'Cards'),
+                _scoreDisplay(_userData.totalPoint.toString(), 'Points'),
+                _scoreDisplay(_userData.totalCards.toString(), 'Cards'),
               ],
             )
           ],

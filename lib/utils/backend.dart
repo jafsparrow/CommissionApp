@@ -13,6 +13,8 @@ abstract class Backend {
   Future<dynamic> addUser(String username, String mobile) {}
 
   Future<QuerySnapshot> findUsers() {}
+
+  Future<void> updateUserData(String userId, String field, String value) {}
 }
 
 class FirestoreBackend implements Backend {
@@ -79,6 +81,25 @@ class FirestoreBackend implements Backend {
   @override
   Future<QuerySnapshot> findUsers() {
     return userDBCollection.orderBy('addedDate').getDocuments();
+  }
+
+  @override
+  Future<void> updateUserData(String userId, String field, String value) async {
+    // return userDBCollection.document(userId).updateData({field: value});
+    print(userId);
+    print(field);
+    print(value);
+    final DocumentReference postRef = userDBCollection.document(userId);
+    return Firestore.instance.runTransaction((Transaction tx) async {
+      DocumentSnapshot postSnapshot = await tx.get(postRef);
+      if (postSnapshot.exists) {
+        var currentData =
+            postSnapshot.data[field] != null ? postSnapshot.data[field] : 0;
+        await tx.update(postRef, <String, dynamic>{
+          'totalPoint': currentData + double.parse(value.toString())
+        });
+      }
+    });
   }
 }
 

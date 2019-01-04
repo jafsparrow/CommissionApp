@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:test2/modals/transaction.modal.dart';
+import 'package:test2/utils/backend.dart';
 
 class UserTransaction extends StatefulWidget {
   DocumentSnapshot _user;
@@ -13,6 +14,7 @@ class _UserTransactionState extends State<UserTransaction> {
   TextEditingController _electricValueController =
       TextEditingController(text: 'super man is awesome');
   static final formKey = GlobalKey<FormState>();
+  FirestoreBackend _backend = new FirestoreBackend();
 
   String _totalBill;
   String _paintBill;
@@ -51,12 +53,21 @@ class _UserTransactionState extends State<UserTransaction> {
           'date': date,
           'points': points
         };
+
         Firestore.instance
             .collection('users')
             .document(widget._user.documentID)
             .collection('transaction')
             .add(data)
-            .then((item) => print('result'));
+            .then((item) {
+          print('result');
+          _backend
+              .updateUserData(
+                  widget._user.documentID, 'totalPoint', points.toString())
+              .then((value) {
+            setState(() {});
+          });
+        });
       } catch (e) {
         print(e);
       }
